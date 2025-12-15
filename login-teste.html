@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Login - LNF Fantasy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn-primary {
+            background: #05D982;
+            color: white;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        #status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Login - LNF Fantasy</h1>
+    
+    <div id="status" class="info">
+        ⏳ Verificando sessão...
+    </div>
+
+    <div class="box" id="login-box" style="display: none;">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email" value="teste@teste.com">
+        <input type="password" id="password" placeholder="Senha" value="123456">
+        <br><br>
+        <button class="btn-primary" onclick="fazerLogin()">Entrar</button>
+    </div>
+
+    <div class="box" id="user-box" style="display: none;">
+        <h2>Usuário Logado</h2>
+        <p><strong>Time:</strong> <span id="user-team">-</span></p>
+        <p><strong>Email:</strong> <span id="user-email">-</span></p>
+        <br>
+        <button class="btn-primary" onclick="irDashboard()">Ir para Dashboard</button>
+        <button class="btn-danger" onclick="fazerLogout()">Sair</button>
+    </div>
+
+    <div class="box">
+        <h3>Console de Logs</h3>
+        <div id="logs" style="background: #000; color: #0f0; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto;">
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+
+    <script>
+        // AGUARDAR CARREGAMENTO COMPLETO
+        window.addEventListener('load', async () => {
+            await new Promise(resolve => setTimeout(resolve, 100)); // Aguardar 100ms
+            iniciarTestes();
+        });
+
+        // Log personalizado
+        function log(msg) {
+            const logs = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${time}] ${msg}<br>`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(msg);
+        }
+
+        // Verificar sessão ao carregar
+        async function iniciarTestes() {
+            log('🚀 Página carregada');
+            log('📦 Verificando Supabase: ' + typeof supabase);
+            log('🔐 Verificando window.auth: ' + typeof window.auth);
+            log('🔐 Verificando auth: ' + typeof auth);
+
+            const status = document.getElementById('status');
+            
+            // Verificar se auth existe
+            if (typeof auth === 'undefined' || typeof window.auth === 'undefined') {
+                log('❌ ERRO: auth não foi carregado!');
+                status.className = 'error';
+                status.textContent = '❌ Erro: auth.js não carregou corretamente';
+                
+                log('🔍 Tentando acessar window.auth...');
+                if (typeof window.auth !== 'undefined') {
+                    log('✅ window.auth existe! Usando window.auth');
+                    window.auth = window.auth;
+                } else {
+                    log('❌ window.auth também não existe');
+                    document.getElementById('login-box').style.display = 'block';
+                    return;
+                }
+            }
+            
+            try {
+                log('⏳ Chamando auth.getCurrentUser()...');
+                const user = await auth.getCurrentUser();
+                
+                if (user) {
+                    log('✅ Usuário encontrado: ' + user.email);
+                    status.className = 'success';
+                    status.textContent = '✅ Você já está logado!';
+                    
+                    document.getElementById('user-team').textContent = user.team_name;
+                    document.getElementById('user-email').textContent = user.email;
+                    document.getElementById('user-box').style.display = 'block';
+                } else {
+                    log('ℹ️ Nenhum usuário logado');
+                    status.className = 'info';
+                    status.textContent = 'ℹ️ Nenhum usuário logado. Faça login abaixo.';
+                    document.getElementById('login-box').style.display = 'block';
+                }
+            } catch (error) {
+                log('❌ Erro: ' + error.message);
+                status.className = 'error';
+                status.textContent = '❌ Erro ao verificar sessão';
+                document.getElementById('login-box').style.display = 'block';
+            }
+        }
+
+        // Fazer login
+        async function fazerLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            log('🔑 Tentando login: ' + email);
+
+            try {
+                const authObj = window.auth || auth;
+                const result = await authObj.login(email, password);
+                
+                if (result.success) {
+                    log('✅ Login realizado!');
+                    window.location.reload();
+                } else {
+                    log('❌ Erro no login: ' + result.error);
+                    alert('Erro: ' + result.error);
+                }
+            } catch (error) {
+                log('❌ Exceção: ' + error.message);
+                alert('Erro: ' + error.message);
+            }
+        }
+
+        // Fazer logout
+        async function fazerLogout() {
+            log('🚪 Fazendo logout...');
+            
+            try {
+                const authObj = window.auth || auth;
+                await authObj.logout();
+                log('✅ Logout realizado!');
+                window.location.reload();
+            } catch (error) {
+                log('❌ Erro no logout: ' + error.message);
+            }
+        }
+
+        // Ir para dashboard
+        function irDashboard() {
+            log('➡️ Redirecionando para dashboard...');
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

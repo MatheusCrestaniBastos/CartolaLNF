@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Rodadas - LNF Fantasy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .scout-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0;
+        }
+        .scout-positivo { color: #10b981; }
+        .scout-negativo { color: #ef4444; }
+        .scout-neutro { color: #6b7280; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 shadow-lg border-b sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="text-4xl">📊</div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-orange-600">Minhas Rodadas</h1>
+                        <p class="text-xs text-gray-500">Histórico completo de desempenho</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="dashboard.html" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm">Dashboard</a>
+                    <a href="mercado.html" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm">Mercado</a>
+                    <button onclick="logout()" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Resumo geral -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+                <p class="text-sm opacity-80 mb-1">Total de Rodadas</p>
+                <p id="total-rodadas" class="text-4xl font-bold">0</p>
+            </div>
+            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+                <p class="text-sm opacity-80 mb-1">Pontos Totais</p>
+                <p id="total-pontos" class="text-4xl font-bold">0</p>
+            </div>
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
+                <p class="text-sm opacity-80 mb-1">Média por Rodada</p>
+                <p id="media-pontos" class="text-4xl font-bold">0</p>
+            </div>
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+                <p class="text-sm opacity-80 mb-1">Melhor Rodada</p>
+                <p id="melhor-rodada" class="text-4xl font-bold">0</p>
+            </div>
+        </div>
+
+        <!-- Lista de rodadas -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 p-6">
+            <h2 class="text-xl font-bold mb-6">📋 Histórico de Rodadas</h2>
+            
+            <div id="lista-rodadas" class="space-y-4">
+                <div class="text-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+                    <p class="text-gray-500">Carregando suas rodadas...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal detalhes da rodada -->
+    <div id="modal-detalhes" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white dark:bg-gray-800 border-b p-6 flex justify-between items-center">
+                <div>
+                    <h2 id="modal-titulo" class="text-2xl font-bold">Rodada X</h2>
+                    <p id="modal-subtitulo" class="text-sm text-gray-500">Pontuação detalhada</p>
+                </div>
+                <button onclick="fecharModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            </div>
+            
+            <div id="modal-conteudo" class="p-6">
+                <!-- Conteúdo será preenchido via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/minhas-rodadas.js"></script>
+</body>
+</html>

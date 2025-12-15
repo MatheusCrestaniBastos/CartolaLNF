@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Admin - LNF Fantasy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ccc;
+        }
+        .box.success { border-left-color: #10b981; }
+        .box.error { border-left-color: #ef4444; }
+        .box.warning { border-left-color: #f59e0b; }
+        
+        h1 { color: #333; }
+        h2 { color: #666; font-size: 18px; margin-top: 0; }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .label { font-weight: 600; color: #666; }
+        .value { color: #333; font-family: monospace; }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn-primary { background: #05D982; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        
+        #logs {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-error { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico Admin - LNF Fantasy</h1>
+    
+    <div id="status-box" class="box">
+        <h2>Status da Verificação</h2>
+        <p id="status-text">⏳ Carregando...</p>
+    </div>
+
+    <div id="user-box" class="box" style="display: none;">
+        <h2>👤 Informações do Usuário</h2>
+        <div class="info-row">
+            <span class="label">Email:</span>
+            <span class="value" id="user-email">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">Time:</span>
+            <span class="value" id="user-team">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">ID:</span>
+            <span class="value" id="user-id">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">is_admin:</span>
+            <span class="value" id="user-admin">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">role:</span>
+            <span class="value" id="user-role">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">É Admin?</span>
+            <span class="value" id="is-admin-result">-</span>
+        </div>
+    </div>
+
+    <div class="box">
+        <h2>🧪 Testes</h2>
+        <button class="btn-primary" onclick="testarBotaoAdmin()">Testar Mostrar Botão Admin</button>
+        <button class="btn-danger" onclick="tornarAdmin()">Tornar-me Admin (SQL)</button>
+        <button class="btn-primary" onclick="recarregar()">Recarregar Página</button>
+    </div>
+
+    <div class="box">
+        <h2>📋 Console de Logs</h2>
+        <div id="logs"></div>
+    </div>
+
+    <div class="box" style="background: #fffbeb; border-left-color: #f59e0b;">
+        <h2>💡 Como Tornar-se Admin</h2>
+        <p><strong>Opção 1:</strong> Clique no botão "Tornar-me Admin" acima (copia SQL para você)</p>
+        <p><strong>Opção 2:</strong> Execute no Supabase SQL Editor:</p>
+        <pre style="background: #f0f0f0; padding: 10px; border-radius: 4px; overflow-x: auto;">UPDATE users SET is_admin = TRUE WHERE email = 'seu@email.com';</pre>
+        <p><strong>Depois:</strong> Faça logout e login novamente</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+
+    <script>
+        function log(msg) {
+            const logs = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${time}] ${msg}<br>`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(msg);
+        }
+
+        window.addEventListener('load', async () => {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            await diagnosticar();
+        });
+
+        async function diagnosticar() {
+            log('🚀 Iniciando diagnóstico...');
+
+            const statusBox = document.getElementById('status-box');
+            const statusText = document.getElementById('status-text');
+
+            try {
+                // Verificar auth
+                log('📦 Verificando auth: ' + typeof auth);
+                if (typeof auth === 'undefined') {
+                    statusBox.className = 'box error';
+                    statusText.innerHTML = '❌ auth não está definido!';
+                    log('❌ ERRO: auth não está definido');
+                    return;
+                }
+
+                // Buscar usuário
+                log('👤 Buscando usuário...');
+                const user = await auth.getCurrentUser();
+                
+                if (!user) {
+                    statusBox.className = 'box error';
+                    statusText.innerHTML = '❌ Você não está logado!';
+                    log('❌ Usuário não está logado');
+                    return;
+                }
+
+                log('✅ Usuário encontrado: ' + user.email);
+
+                // Buscar dados completos
+                log('📊 Buscando dados completos...');
+                const { data: userData, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (error) {
+                    log('❌ Erro ao buscar dados: ' + error.message);
+                    statusBox.className = 'box error';
+                    statusText.innerHTML = '❌ Erro ao buscar dados do usuário';
+                    return;
+                }
+
+                log('✅ Dados carregados');
+                log('   - is_admin: ' + userData.is_admin);
+                log('   - role: ' + userData.role);
+
+                // Exibir dados
+                document.getElementById('user-box').style.display = 'block';
+                document.getElementById('user-email').textContent = userData.email;
+                document.getElementById('user-team').textContent = userData.team_name;
+                document.getElementById('user-id').textContent = userData.id;
+                document.getElementById('user-admin').textContent = userData.is_admin === true ? 'TRUE ✅' : 'FALSE ❌';
+                document.getElementById('user-role').textContent = userData.role || 'null';
+
+                // Verificar se é admin
+                const isAdmin = userData.is_admin === true || userData.role === 'admin';
+                document.getElementById('is-admin-result').innerHTML = isAdmin ? 
+                    '<span class="status-badge badge-success">SIM ✅</span>' : 
+                    '<span class="status-badge badge-error">NÃO ❌</span>';
+
+                log('🔐 É admin? ' + isAdmin);
+
+                // Status final
+                if (isAdmin) {
+                    statusBox.className = 'box success';
+                    statusText.innerHTML = '✅ Você É ADMIN! O botão Admin deve aparecer.';
+                    log('✅ DIAGNÓSTICO: Usuário É admin');
+                } else {
+                    statusBox.className = 'box warning';
+                    statusText.innerHTML = '⚠️ Você NÃO é admin. Use o botão abaixo para tornar-se admin.';
+                    log('⚠️ DIAGNÓSTICO: Usuário NÃO é admin');
+                }
+
+            } catch (error) {
+                log('❌ ERRO: ' + error.message);
+                statusBox.className = 'box error';
+                statusText.innerHTML = '❌ Erro: ' + error.message;
+            }
+        }
+
+        async function testarBotaoAdmin() {
+            log('🧪 Testando botão admin...');
+            
+            try {
+                await auth.checkAndShowAdminLink();
+                log('✅ Função checkAndShowAdminLink() executada');
+                log('ℹ️ Verifique os logs acima para ver o resultado');
+                
+                alert('Função executada!\n\nVeja o Console (F12) para logs detalhados.\n\nSe você É admin, vá para dashboard.html e veja se o botão aparece.');
+            } catch (error) {
+                log('❌ Erro ao testar: ' + error.message);
+                alert('Erro: ' + error.message);
+            }
+        }
+
+        async function tornarAdmin() {
+            try {
+                const user = await auth.getCurrentUser();
+                if (!user) {
+                    alert('Você não está logado!');
+                    return;
+                }
+
+                const sql = `UPDATE users SET is_admin = TRUE WHERE email = '${user.email}';`;
+                
+                // Copiar para clipboard
+                await navigator.clipboard.writeText(sql);
+                
+                alert('✅ SQL COPIADO!\n\n' +
+                      'Cole no Supabase SQL Editor:\n\n' +
+                      sql + '\n\n' +
+                      'Depois:\n' +
+                      '1. Execute o SQL\n' +
+                      '2. Faça LOGOUT\n' +
+                      '3. Faça LOGIN novamente\n' +
+                      '4. Volte aqui e clique em "Recarregar"');
+                
+                log('📋 SQL copiado para clipboard');
+                log('SQL: ' + sql);
+            } catch (error) {
+                alert('Erro ao copiar SQL: ' + error.message);
+            }
+        }
+
+        function recarregar() {
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>

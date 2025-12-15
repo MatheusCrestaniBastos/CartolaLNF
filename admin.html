@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - LNF Fantasy</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <style>
+        #admin-loading {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        #admin-loading .loading-content {
+            text-align: center;
+        }
+        #admin-loading .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tela de Loading -->
+    <div id="admin-loading">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p style="color: var(--gray-600); font-weight: 600;">🔒 Verificando permissões...</p>
+            <p style="color: var(--gray-500); font-size: 14px; margin-top: 8px;">Apenas administradores podem acessar</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header-lnf">
+        <div class="container">
+            <div class="header-content">
+                <a href="dashboard.html" class="logo-lnf">
+                    <span class="logo-icon">⚙️</span>
+                    <div>
+                        <div class="logo-text">LNF Fantasy Admin</div>
+                        <div class="logo-subtitle">Painel de Administração</div>
+                    </div>
+                </a>
+
+                <nav class="nav-menu">
+                    <a href="dashboard.html" class="nav-link">Meu Time</a>
+                    <a href="mercado.html" class="nav-link">Mercado</a>
+                    <a href="admin.html" class="nav-link active">Admin</a>
+                </nav>
+
+                <div class="user-section">
+                    <button onclick="window.location.href='dashboard.html'" class="btn btn-ghost btn-sm">Sair do Admin</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="admin-wrapper">
+        <div class="container">
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-players">
+                    <div class="stat-icon">⚽</div>
+                    <div class="stat-content">
+                        <div id="total-players" class="stat-number">0</div>
+                        <div class="stat-label">Jogadores</div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-teams">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-content">
+                        <div id="total-teams" class="stat-number">0</div>
+                        <div class="stat-label">Times LNF</div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-rounds">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div id="total-rounds" class="stat-number">0</div>
+                        <div class="stat-label">Rodadas</div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-users">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <div id="total-users" class="stat-number">0</div>
+                        <div class="stat-label">Usuários</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="card admin-card">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="teams" onclick="openTab('teams')">Times</button>
+                    <button class="tab-btn" data-tab="players" onclick="openTab('players')">Jogadores</button>
+                    <button class="tab-btn" data-tab="rounds" onclick="openTab('rounds')">Rodadas</button>
+                    <button class="tab-btn" data-tab="scouts" onclick="openTab('scouts')">Scouts</button>
+                </div>
+
+                <!-- TAB: Times -->
+                <div id="tab-teams" class="tab-content active">
+                    <div class="tab-layout">
+                        <div class="form-section">
+                            <h3>Adicionar Time</h3>
+                            <form id="form-add-team" onsubmit="addTeam(event)">
+                                <div class="form-group">
+                                    <label class="form-label">Nome do Time</label>
+                                    <input type="text" id="team-name" class="form-input" placeholder="Magnus Futsal" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">URL do Logo (opcional)</label>
+                                    <input type="url" id="team-logo" class="form-input" placeholder="https://...">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-full">Adicionar Time</button>
+                            </form>
+                        </div>
+
+                        <div class="list-section">
+                            <h3>Times Cadastrados</h3>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th style="width:100px" class="text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="teams-list">
+                                        <tr><td colspan="2" class="text-center" style="padding:40px"><div class="spinner"></div></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Jogadores -->
+                <div id="tab-players" class="tab-content">
+                    <div class="tab-layout">
+                        <div class="form-section">
+                            <h3>Adicionar Jogador</h3>
+                            <form id="form-add-player" onsubmit="addPlayer(event)">
+                                <div class="form-group">
+                                    <label class="form-label">Nome</label>
+                                    <input type="text" id="player-name" class="form-input" placeholder="Nome do jogador" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Posição</label>
+                                    <select id="player-position" class="form-input" required>
+                                        <option value="">Selecione</option>
+                                        <option value="GOL">Goleiro</option>
+                                        <option value="FIX">Fixo</option>
+                                        <option value="ALA">Ala</option>
+                                        <option value="PIV">Pivô</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Time</label>
+                                    <select id="player-team" class="form-input" required>
+                                        <option value="">Selecione</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Preço (C$)</label>
+                                    <input type="number" id="player-price" class="form-input" placeholder="5.00" step="0.01" min="1" max="20" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">URL da Foto (opcional)</label>
+                                    <input type="url" id="player-photo" class="form-input" placeholder="https://...">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-full">Adicionar Jogador</button>
+                            </form>
+                        </div>
+
+                        <div class="list-section">
+                            <h3>Jogadores Cadastrados</h3>
+                            <div class="filters-row">
+                                <select id="filter-position" onchange="filterPlayers()" class="form-input">
+                                    <option value="">Todas posições</option>
+                                    <option value="GOL">Goleiro</option>
+                                    <option value="FIX">Fixo</option>
+                                    <option value="ALA">Ala</option>
+                                    <option value="PIV">Pivô</option>
+                                </select>
+                                <select id="filter-team" onchange="filterPlayers()" class="form-input">
+                                    <option value="">Todos times</option>
+                                </select>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Jogador</th>
+                                            <th style="width:80px" class="text-center">Pos</th>
+                                            <th style="width:100px" class="text-right">Preço</th>
+                                            <th style="width:120px" class="text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="players-list">
+                                        <tr><td colspan="4" class="text-center" style="padding:40px"><div class="spinner"></div></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Rodadas -->
+                <div id="tab-rounds" class="tab-content">
+                    <div class="tab-layout">
+                        <div class="form-section">
+                            <h3>Criar Rodada</h3>
+                            <form id="form-add-round" onsubmit="addRound(event)">
+                                <div class="form-group">
+                                    <label class="form-label">Nome</label>
+                                    <input type="text" id="round-name" class="form-input" placeholder="Rodada 1" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-full">Criar Rodada</button>
+                            </form>
+
+                            <div class="manage-section">
+                                <h3>Gerenciar Rodada</h3>
+                                <select id="round-manage" class="form-input">
+                                    <option value="">Selecione uma rodada...</option>
+                                </select>
+                                <div class="actions-grid">
+                                    <button onclick="startRound()" class="btn btn-primary">Iniciar</button>
+                                    <button onclick="finishRound()" class="btn btn-secondary">Finalizar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="list-section">
+                            <h3>Rodadas Criadas</h3>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Rodada</th>
+                                            <th style="width:120px" class="text-center">Status</th>
+                                            <th style="width:140px" class="text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rounds-list">
+                                        <tr><td colspan="3" class="text-center" style="padding:40px"><div class="spinner"></div></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Scouts -->
+                <div id="tab-scouts" class="tab-content">
+                    <div class="scouts-container">
+                        <h3>Lançar Scouts</h3>
+                        <form id="form-scouts" onsubmit="saveScouts(event)" class="scouts-form">
+                            <div class="scouts-select-row">
+                                <div class="form-group">
+                                    <label class="form-label">Rodada</label>
+                                    <select id="scout-round" class="form-input" required>
+                                        <option value="">Selecione</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Jogador</label>
+                                    <select id="scout-player" class="form-input" required>
+                                        <option value="">Selecione</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="scouts-grid">
+                                <div class="scouts-section scouts-positive">
+                                    <h4>✅ Ações Positivas</h4>
+                                    <div class="scouts-row">
+                                        <div class="form-group">
+                                            <label>⚽ Gols (+8)</label>
+                                            <input type="number" id="scout-goals" class="form-input" min="0" value="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>🎯 Assistências (+5)</label>
+                                            <input type="number" id="scout-assists" class="form-input" min="0" value="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>🧤 Defesas (+7)</label>
+                                            <input type="number" id="scout-saves" class="form-input" min="0" value="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="display:flex; align-items:center; gap:8px">
+                                                <input type="checkbox" id="scout-clean">
+                                                <span>🛡️ Sem sofrer gol (+5)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="scouts-section scouts-negative">
+                                    <h4>❌ Ações Negativas</h4>
+                                    <div class="scouts-row">
+                                        <div class="form-group">
+                                            <label>⚽ Gols Contra (-3)</label>
+                                            <input type="number" id="scout-own" class="form-input" min="0" value="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>🟨 Amarelos (-1)</label>
+                                            <input type="number" id="scout-yellow" class="form-input" min="0" value="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>🟥 Vermelhos (-5)</label>
+                                            <input type="number" id="scout-red" class="form-input" min="0" value="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-full btn-lg">Salvar Scouts</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/admin.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,316 @@
+/* ============================================
+   MERCADO - ESTILO PROFISSIONAL
+   ============================================ */
+
+.mercado-wrapper {
+    padding: 24px 0 60px;
+    min-height: calc(100vh - 60px);
+}
+
+.mercado-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+}
+
+/* ============================================
+   SIDEBAR - ESCALAÇÃO
+   ============================================ */
+
+.escalacao-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Budget Card */
+.budget-card {
+    position: sticky;
+    top: 80px;
+}
+
+.budget-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.budget-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.budget-item span {
+    color: var(--gray-600);
+    font-weight: 600;
+}
+
+.budget-item strong {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.budget-divider {
+    height: 1px;
+    background: var(--gray-200);
+    margin: 4px 0;
+}
+
+/* Lineup Card */
+.lineup-card {
+    position: sticky;
+    top: calc(80px + 180px);
+}
+
+.lineup-status {
+    text-align: center;
+    font-size: 13px;
+    color: var(--gray-600);
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding: 8px;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+}
+
+/* Mini Field */
+.mini-field {
+    background: linear-gradient(180deg, var(--field-dark), var(--field-light));
+    border-radius: var(--radius-md);
+    padding: 20px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mini-slots-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.mini-slot {
+    background: rgba(255,255,255,0.15);
+    border: 2px dashed rgba(255,255,255,0.3);
+    border-radius: var(--radius);
+    padding: 12px;
+    text-align: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.mini-slot.filled {
+    background: white;
+    border-color: var(--primary);
+    color: var(--gray-900);
+}
+
+.mini-slot-player {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.mini-slot-price {
+    font-size: 10px;
+    color: var(--gray-600);
+}
+
+.mini-slot-remove {
+    font-size: 10px;
+    color: var(--error);
+    cursor: pointer;
+    margin-top: 4px;
+}
+
+/* Lineup Actions */
+.lineup-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ============================================
+   PLAYERS MAIN
+   ============================================ */
+
+.players-main {
+    min-height: 600px;
+}
+
+/* Filters Bar */
+.filters-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* Players Table */
+.players-table tbody tr {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.players-table tbody tr:hover {
+    background: var(--gray-50);
+}
+
+.players-table tbody tr.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.player-photo-cell {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gray-200);
+}
+
+.player-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.player-info-name {
+    font-weight: 700;
+    color: var(--gray-900);
+    font-size: 14px;
+}
+
+.player-info-team {
+    font-size: 12px;
+    color: var(--gray-500);
+}
+
+.position-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.position-badge-gol {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+}
+
+.position-badge-fix {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--info);
+}
+
+.position-badge-ala {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+
+.position-badge-piv {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
+}
+
+.price-value {
+    font-weight: 800;
+    color: var(--gray-900);
+    font-size: 15px;
+}
+
+.status-text {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.btn-add {
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .mercado-layout {
+        grid-template-columns: 280px 1fr;
+        gap: 20px;
+    }
+
+    .filters-bar {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .mercado-wrapper {
+        padding: 16px 0 40px;
+    }
+
+    .mercado-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .escalacao-sidebar {
+        position: sticky;
+        top: 60px;
+        background: var(--gray-50);
+        padding: 16px;
+        margin: 0 -20px;
+        z-index: 50;
+    }
+
+    .budget-card,
+    .lineup-card {
+        position: static;
+    }
+
+    .budget-card {
+        margin-bottom: 16px;
+    }
+
+    .filters-bar {
+        grid-template-columns: 1fr;
+    }
+
+    .players-table th:nth-child(5),
+    .players-table td:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .mini-field {
+        padding: 16px 12px;
+    }
+
+    .mini-slot {
+        padding: 10px;
+        min-height: 44px;
+        font-size: 10px;
+    }
+
+    .players-table th:nth-child(1),
+    .players-table td:nth-child(1) {
+        display: none;
+    }
+
+    .player-info-team {
+        display: none;
+    }
+}

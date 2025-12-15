@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - LNF Fantasy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ccc;
+        }
+        .test-box.success {
+            border-left-color: #10b981;
+        }
+        .test-box.error {
+            border-left-color: #ef4444;
+        }
+        h1 {
+            color: #333;
+        }
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 LNF Fantasy - Teste de Carregamento</h1>
+    
+    <div id="test-supabase" class="test-box">
+        <strong>1. Supabase:</strong> <span id="result-supabase">Verificando...</span>
+    </div>
+    
+    <div id="test-config" class="test-box">
+        <strong>2. Config:</strong> <span id="result-config">Verificando...</span>
+    </div>
+    
+    <div id="test-auth" class="test-box">
+        <strong>3. Auth:</strong> <span id="result-auth">Verificando...</span>
+    </div>
+    
+    <div id="test-connection" class="test-box">
+        <strong>4. Conexão com Supabase:</strong> <span id="result-connection">Verificando...</span>
+    </div>
+
+    <hr style="margin: 30px 0;">
+
+    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+        <strong>ℹ️ Como usar:</strong>
+        <ol>
+            <li>Abra o Console do navegador (F12)</li>
+            <li>Veja os logs de carregamento</li>
+            <li>Todos os testes devem estar ✅ verdes</li>
+        </ol>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+
+    <script>
+        // Executar testes
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🧪 Iniciando testes...');
+
+            // Teste 1: Supabase
+            const test1 = document.getElementById('test-supabase');
+            const result1 = document.getElementById('result-supabase');
+            if (typeof window.supabase !== 'undefined') {
+                result1.textContent = '✅ window.supabase está disponível';
+                test1.classList.add('success');
+            } else {
+                result1.textContent = '❌ window.supabase NÃO está disponível';
+                test1.classList.add('error');
+            }
+
+            // Teste 2: Config
+            const test2 = document.getElementById('test-config');
+            const result2 = document.getElementById('result-config');
+            if (typeof supabase !== 'undefined') {
+                result2.textContent = `✅ supabase criado: ${typeof supabase}`;
+                test2.classList.add('success');
+            } else {
+                result2.textContent = '❌ supabase NÃO foi criado';
+                test2.classList.add('error');
+            }
+
+            // Teste 3: Auth
+            const test3 = document.getElementById('test-auth');
+            const result3 = document.getElementById('result-auth');
+            if (typeof auth !== 'undefined') {
+                result3.textContent = `✅ auth está disponível: ${typeof auth}`;
+                test3.classList.add('success');
+            } else {
+                result3.textContent = '❌ auth NÃO está disponível';
+                test3.classList.add('error');
+            }
+
+            // Teste 4: Conexão
+            const test4 = document.getElementById('test-connection');
+            const result4 = document.getElementById('result-connection');
+            try {
+                const { data, error } = await supabase.from('users').select('count').limit(1);
+                if (error) {
+                    result4.textContent = `⚠️ Erro: ${error.message}`;
+                    test4.classList.add('error');
+                } else {
+                    result4.textContent = '✅ Conectado ao Supabase com sucesso!';
+                    test4.classList.add('success');
+                }
+            } catch (error) {
+                result4.textContent = `❌ Erro ao conectar: ${error.message}`;
+                test4.classList.add('error');
+            }
+
+            console.log('✅ Testes concluídos');
+        });
+    </script>
+</body>
+</html>

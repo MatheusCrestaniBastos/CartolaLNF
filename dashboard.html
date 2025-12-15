@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Time - LNF Fantasy</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body>
+
+    <!-- Header Verde -->
+    <header class="header-lnf">
+        <div class="container">
+            <div class="header-content">
+                <a href="dashboard.html" class="logo-lnf">
+                    <span class="logo-icon">⚽</span>
+                    <div>
+                        <div class="logo-text">LNF Fantasy</div>
+                        <div class="logo-subtitle">Liga Nacional de Futsal</div>
+                    </div>
+                </a>
+
+                <nav class="nav-menu">
+                    <a href="dashboard.html" class="nav-link active">Meu Time</a>
+                    <a href="minhas-rodadas.html" class="nav-link">Minhas Rodadas</a>
+                    <a href="mercado.html" class="nav-link">Mercado</a>
+                    <a href="admin.html" id="admin-link" class="nav-link" style="display: none;">Admin</a>
+                </nav>
+
+                <div class="user-section">
+                    <span id="user-display" class="user-name">Carregando...</span>
+                    <button onclick="handleLogout()" class="btn btn-ghost btn-sm">Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div class="container">
+
+            <!-- Team Header Card -->
+            <div class="team-header-card">
+                <div class="team-info-left">
+                    <div class="team-avatar">
+                        <span>👤</span>
+                    </div>
+                    <div class="team-details">
+                        <h1 id="team-name" class="team-name">Meu Time</h1>
+                        <p id="round-status" class="team-round">Carregando...</p>
+                    </div>
+                </div>
+
+                <div class="team-stats">
+                    <div class="stat-item">
+                        <div id="stat-points" class="stat-value">0</div>
+                        <div class="stat-label">Pontos</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div id="stat-position" class="stat-value">-</div>
+                        <div class="stat-label">Posição</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div id="stat-balance" class="stat-value">C$ 0</div>
+                        <div class="stat-label">Cartoletas</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lineup Section -->
+            <div class="card lineup-card">
+                <div class="card-header">
+                    <h3 class="card-title">Minha Escalação</h3>
+                    <a href="mercado.html" class="btn btn-primary">Editar Time</a>
+                </div>
+
+                <!-- Field -->
+                <div class="field-container">
+                    <div id="field-players" class="field-grid">
+                        <div class="field-loading">
+                            <div class="spinner"></div>
+                            <p>Carregando escalação...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="lineup-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Pontos da rodada</span>
+                        <span id="summary-points" class="summary-value">0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Patrimônio</span>
+                        <span id="summary-patrimony" class="summary-value">C$ 0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranking Section -->
+            <div class="card ranking-card">
+                <div class="card-header">
+                    <h3 class="card-title">Classificação Geral</h3>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width:60px">#</th>
+                                <th>Time</th>
+                                <th style="width:100px" class="text-center">Pontos</th>
+                                <th style="width:120px" class="text-right">Patrimônio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ranking-body">
+                            <tr>
+                                <td colspan="4" style="text-align:center; padding:40px">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal de Estatísticas do Jogador -->
+    <div id="stats-modal" style="display: none;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+    
+    <!-- Garantir que botão admin apareça para admins -->
+    <script>
+    window.addEventListener('load', async function() {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return;
+            
+            const { data } = await supabase
+                .from('users')
+                .select('is_admin')
+                .eq('id', session.user.id)
+                .single();
+            
+            const isAdmin = data?.is_admin === true;
+            
+            if (isAdmin) {
+                const link = document.getElementById('admin-link');
+                if (link) {
+                    link.style.display = 'inline-flex';
+                    link.style.visibility = 'visible';
+                    console.log('✅ Botão Admin garantido!');
+                }
+            }
+        } catch (e) {
+            console.error('Erro ao verificar admin:', e);
+        }
+    });
+    </script>
+
+</body>
+</html>
