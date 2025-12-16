@@ -50,7 +50,10 @@ async function loadUserStats() {
         
         if (userData) {
             document.getElementById('stat-points').textContent = userData.total_points || 0;
-            document.getElementById('stat-balance').textContent = `C$ ${userData.cartoletas.toFixed(2)}`;
+            
+            // Cartoletas = patrimônio (sempre positivo)
+            const cartoletas = Math.abs(userData.cartoletas || 0);
+            document.getElementById('stat-balance').textContent = `C$ ${cartoletas.toFixed(2)}`;
         }
         
         // Buscar posição no ranking
@@ -403,7 +406,7 @@ async function loadRanking() {
                     <td class="text-center ranking-position ${position <= 3 ? 'medal' : ''}">${posDisplay}</td>
                     <td class="ranking-team">${user.team_name}${isMe ? ' <span class="badge badge-primary">VOCÊ</span>' : ''}</td>
                     <td class="text-center ranking-points">${user.total_points || 0}</td>
-                    <td class="text-right ranking-money">C$ ${user.cartoletas.toFixed(2)}</td>
+                    <td class="text-right ranking-money">C$ ${Math.abs(user.cartoletas || 0).toFixed(2)}</td>
                 </tr>
             `;
         }).join('');

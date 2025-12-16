@@ -36,6 +36,12 @@
         .nav-link:hover, .nav-link.active { opacity: 1; font-weight: 600; }
         .balance-display { font-size: 1.25rem; font-weight: bold; }
         
+        /* BADGES DE STATUS */
+        .badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; }
+        .badge-success { background: rgba(16, 185, 129, 0.9); color: white; }
+        .badge-danger { background: rgba(239, 68, 68, 0.9); color: white; }
+        .badge-warning { background: rgba(245, 158, 11, 0.9); color: white; }
+        
         /* LAYOUT */
         .mercado-container {
             max-width: 1400px;
@@ -424,7 +430,12 @@
                 <a href="mercado.html" class="nav-link active">Mercado</a>
                 <a href="admin.html" id="admin-link" class="nav-link" style="display: none;">Admin</a>
             </nav>
-            <div class="balance-display">C$ <span id="budget-total">50.00</span></div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span id="market-status" style="padding: 0.25rem 0.75rem; background: rgba(255,255,255,0.2); border-radius: 9999px; font-size: 0.875rem; font-weight: 600;">
+                    Carregando...
+                </span>
+                <div class="balance-display">C$ <span id="budget-total">50.00</span></div>
+            </div>
         </div>
     </header>
 

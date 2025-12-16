@@ -33,8 +33,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         console.log('✅ Usuário:', currentUser.email);
         
-        // Carregar dados
+        // Carregar saldo
         await loadBudget();
+        
+        // VERIFICAR SE MERCADO ESTÁ ABERTO
+        const marketOpen = await checkMarketStatus();
+        
+        if (!marketOpen) {
+            console.log('🔴 Mercado fechado - não carrega jogadores');
+            return; // Para aqui se mercado fechado
+        }
+        
+        // Só carrega jogadores se mercado estiver aberto
         await loadPlayers();
         await loadCurrentLineup();
         await populateTeamFilter();
@@ -70,6 +80,105 @@ async function loadBudget() {
     } catch (error) {
         console.error('Erro ao carregar saldo:', error);
         budget = 50.00;
+    }
+}
+
+// ============================================
+// VERIFICAR STATUS DO MERCADO
+// ============================================
+
+async function checkMarketStatus() {
+    try {
+        console.log('🔍 Verificando status do mercado...');
+        
+        const { data: rounds } = await supabase
+            .from('rounds')
+            .select('id, name, status')
+            .in('status', ['pending', 'active'])
+            .order('id', { ascending: false })
+            .limit(1);
+        
+        // Elemento de status (pode não existir em todos os HTMLs)
+        const statusElement = document.getElementById('market-status');
+        
+        if (!rounds || rounds.length === 0) {
+            if (statusElement) {
+                statusElement.textContent = 'Nenhuma rodada disponível';
+                statusElement.className = 'badge badge-warning';
+            }
+            showMarketClosed('Nenhuma rodada disponível para escalação');
+            return false;
+        }
+        
+        const round = rounds[0];
+        
+        // MERCADO FECHADO - Rodada já iniciada (ACTIVE)
+        if (round.status === 'active') {
+            console.log('🔴 Mercado FECHADO - Rodada ativa:', round.name);
+            if (statusElement) {
+                statusElement.textContent = `${round.name} - 🔴 Mercado Fechado`;
+                statusElement.className = 'badge badge-danger';
+            }
+            showMarketClosed(`${round.name} - Mercado fechado! A rodada já começou.`);
+            return false;
+        }
+        
+        // MERCADO ABERTO - Rodada pendente
+        console.log('✅ Mercado ABERTO - Rodada pendente:', round.name);
+        if (statusElement) {
+            statusElement.textContent = `${round.name} - ✅ Mercado Aberto`;
+            statusElement.className = 'badge badge-success';
+        }
+        return true;
+        
+    } catch (error) {
+        console.error('Erro ao verificar mercado:', error);
+        return false;
+    }
+}
+
+function showMarketClosed(message) {
+    const container = document.getElementById('players-list');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <tr>
+            <td colspan="5" style="padding: 4rem 2rem; text-align: center;">
+                <div style="max-width: 500px; margin: 0 auto;">
+                    <div style="font-size: 4rem; margin-bottom: 1.5rem;">🔒</div>
+                    <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #dc2626;">
+                        Mercado Fechado
+                    </h2>
+                    <p style="color: #6b7280; margin-bottom: 2rem;">
+                        ${message}
+                    </p>
+                    <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem;">
+                        <p style="font-weight: 600; color: #92400e; margin-bottom: 0.5rem;">
+                            ⚠️ Por que o mercado está fechado?
+                        </p>
+                        <p style="font-size: 0.875rem; color: #78350f;">
+                            Quando uma rodada é iniciada pelo administrador, o mercado fecha automaticamente.
+                            Isso significa que ninguém pode mais alterar sua escalação até que a rodada termine.
+                        </p>
+                    </div>
+                    <a href="dashboard.html" style="display: inline-block; padding: 0.75rem 1.5rem; background: #ff6b00; color: white; border-radius: 0.5rem; text-decoration: none; font-weight: 600;">
+                        Voltar ao Dashboard
+                    </a>
+                </div>
+            </td>
+        </tr>
+    `;
+    
+    // Desabilitar botões de salvar
+    const saveBtn = document.getElementById('btn-save');
+    const clearBtn = document.querySelector('button[onclick="clearLineup()"]');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = '🔒 Mercado Fechado';
+        saveBtn.className = 'btn btn-secondary w-full';
+    }
+    if (clearBtn) {
+        clearBtn.disabled = true;
     }
 }
 
@@ -124,26 +233,29 @@ async function loadCurrentLineup() {
             .from('rounds')
             .select('id')
             .eq('status', 'pending')
-            .limit(1)
-            .single();
+            .limit(1);
         
-        if (!rounds) {
+        if (!rounds || rounds.length === 0) {
             console.log('Nenhuma rodada pendente');
             return;
         }
+        
+        const round = rounds[0];
         
         // Buscar escalação do usuário
         const { data: lineups } = await supabase
             .from('lineups')
             .select('id')
             .eq('user_id', currentUser.id)
-            .eq('round_id', rounds.id)
-            .single();
+            .eq('round_id', round.id)
+            .limit(1);
         
-        if (!lineups) {
+        if (!lineups || lineups.length === 0) {
             console.log('Nenhuma escalação salva');
             return;
         }
+        
+        const myLineup = lineups[0];
         
         // Buscar jogadores escalados
         const { data: players } = await supabase
@@ -159,7 +271,7 @@ async function loadCurrentLineup() {
                     teams (name, logo_url)
                 )
             `)
-            .eq('lineup_id', lineups.id)
+            .eq('lineup_id', myLineup.id)
             .eq('is_starter', true);
         
         if (!players || players.length === 0) {
@@ -480,25 +592,35 @@ async function saveLineup() {
     }
     
     try {
-        // Buscar rodada pendente
-        const { data: round, error: roundError } = await supabase
+        // Buscar rodada PENDENTE (mercado aberto)
+        const { data: rounds, error: roundError } = await supabase
             .from('rounds')
-            .select('id')
+            .select('id, name, status')
             .eq('status', 'pending')
-            .single();
+            .limit(1);
         
-        if (roundError || !round) {
-            alert('⚠️ Nenhuma rodada disponível para escalação');
+        if (roundError || !rounds || rounds.length === 0) {
+            alert('⚠️ Mercado fechado! Nenhuma rodada disponível para escalação.\n\nO mercado só aceita escalações quando há uma rodada PENDENTE.');
+            return;
+        }
+        
+        const round = rounds[0];
+        
+        // VERIFICAÇÃO DUPLA: Confirmar que rodada ainda está pendente
+        if (round.status !== 'pending') {
+            alert(`🔴 Mercado fechado!\n\nA ${round.name} já foi iniciada pelo administrador.\n\nVocê não pode mais alterar sua escalação.`);
             return;
         }
         
         // Verificar se já tem escalação
-        const { data: existingLineup } = await supabase
+        const { data: existingLineups } = await supabase
             .from('lineups')
             .select('id')
             .eq('user_id', currentUser.id)
             .eq('round_id', round.id)
-            .single();
+            .limit(1);
+        
+        const existingLineup = existingLineups && existingLineups.length > 0 ? existingLineups[0] : null;
         
         let lineupId;
         
@@ -565,16 +687,20 @@ async function saveLineup() {
         
         if (playersError) throw playersError;
         
-        // Atualizar saldo do usuário
-        const cost = calculateCost();
-        const newBudget = budget - cost;
+        // Recalcular patrimônio do usuário baseado nos jogadores escalados
+        // Isso garante que as cartoletas sempre reflitam o valor real do time
+        const { data: patrimonioData, error: patrimonioError } = await supabase
+            .rpc('recalcular_patrimonio_usuario', { user_id_param: currentUser.id });
         
-        const { error: budgetError } = await supabase
-            .from('users')
-            .update({ cartoletas: newBudget })
-            .eq('id', currentUser.id);
-        
-        if (budgetError) throw budgetError;
+        if (patrimonioError) {
+            console.warn('Aviso ao recalcular patrimônio:', patrimonioError);
+            // Fallback: calcular manualmente
+            const cost = calculateCost();
+            await supabase
+                .from('users')
+                .update({ cartoletas: cost })
+                .eq('id', currentUser.id);
+        }
         
         alert('✅ Escalação salva com sucesso!');
         window.location.href = 'dashboard.html';
