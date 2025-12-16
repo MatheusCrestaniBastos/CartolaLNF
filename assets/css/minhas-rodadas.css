@@ -1,0 +1,128 @@
+/* ============================================
+   MINHAS RODADAS - ESTILOS
+   ============================================ */
+
+/* Cards de Rodadas */
+.round-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.round-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    border-color: #05D982;
+}
+
+.round-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.round-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.round-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.round-points {
+    text-align: right;
+}
+
+.points-value {
+    font-size: 32px;
+    font-weight: 900;
+    color: #05D982;
+    line-height: 1;
+}
+
+.points-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.round-footer {
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.round-action {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+/* Modal */
+#modal-detalhes {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 9999;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#modal-detalhes.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#modal-detalhes > div {
+    width: 100%;
+    max-width: 800px;
+}
+
+/* Spinner */
+.spinner {
+    border: 3px solid rgba(0,0,0,0.1);
+    border-top-color: #05D982;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .round-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .round-points {
+        text-align: left;
+    }
+    
+    .points-value {
+        font-size: 28px;
+    }
+}
