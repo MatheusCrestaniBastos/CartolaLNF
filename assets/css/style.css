@@ -496,3 +496,16 @@ select.form-input {
     .nav-menu { flex-wrap: wrap; }
     .nav-link { flex: 1; text-align: center; }
 }
+
+.logo-login {
+    width: 180px;
+    height: auto;
+    margin: 0 auto 16px;
+    filter: drop-shadow(0 8px 20px rgba(5, 217, 130, 0.3));
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}

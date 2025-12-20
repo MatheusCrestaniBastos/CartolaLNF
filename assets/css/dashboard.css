@@ -845,3 +845,14 @@
     color: #6b7280;
     font-size: 14px;
 }
+.logo-header {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+    transition: transform 0.3s ease;
+}
+
+.logo-lnf:hover .logo-header {
+    transform: scale(1.1) rotate(5deg);
+}
